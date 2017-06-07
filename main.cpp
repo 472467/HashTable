@@ -12,30 +12,31 @@ using namespace std;
 
 void translateInput(char*, HashTable*&);
 int convertCharToInt(char);
+void printStudent(Student* s);
 
 
 int main(){
 	cout << "dots in visualization represent empty locations\n";
 	
-	HashTable* head = NULL;
+	HashTable* hashTable = new HashTable(10000);
 	
 	while(true){
 		
 		
 		char* input = new char[10];
-		cout << "\n(a) - add // (p) - print // (d) - delete // (q) - quit\n\n";
+		cout << "\n(a) - add // (p) - print // (f) - find // (d) - delete // (q) - quit\n\n";
 		cout << "Enter command:" ;
 		cin.getline(input, 10);
 		
-		translateInput(input, head);
+		translateInput(input, hashTable);
 	}
 }
 
-void translateInput(char* input, HashTable*& head){
+void translateInput(char* input, HashTable*& hashTable){
 	//char* input = new char[10];
 	
-	if(strcmp(input, "add") == 0 || strcmp(input, "a") == 0){
-		cout << "Input a number of random students you would like to add to the table:\n";
+	if(strcasecmp(input, "add") == 0 || strcasecmp(input, "a") == 0){
+		cout << "Input a number of random students you would like to add to the table: ";
 		input = new char[9];
 		cin.getline(input, 9);
 		
@@ -47,18 +48,69 @@ void translateInput(char* input, HashTable*& head){
 		}
 		
 		for(int x = 0; x < amount; x++){
-			if(x % (amount/4) == 0 && x  != 0){
-				cout << x << " out of " << amount << " students left.\n";
-			}
+			Student* s = new Student(hashTable->getSeed());
+			hashTable->addToTable(s);
+		}
+		
+		while(hashTable->getCollisions() >= 3){
+			cout <<endl<<endl<< hashTable->getCollisions() << endl << endl;
+			hashTable->resizeTable(hashTable->getTableSize()*2);
 		}
 		
 		
 		
-	}else if(strcmp(input, "print") == 0 || strcmp(input, "p") == 0){
+	}else if(strcasecmp(input, "find") == 0 || strcasecmp(input, "f") == 0){
+		char* name = new char[20];
+		cout << "Enter FIRST name of student you would like to find" << endl;
+		cin.getline(name, 20);
 		
+		char* lName = new char[20];
+		cout << "Enter LAST name of student you would like to find" << endl;
+		cin.getline(lName, 20);
 		
+		Student* clone = new Student(name, lName, 0);
 		
-	}else if(strcmp(input, "quit") == 0 || strcmp(input, "q") == 0){
+		unsigned hashID = hashTable->shittyHashFunction(clone);
+		LinkedList* current = hashTable->getTable()[hashID];
+		if(current == NULL){
+			if(strcasecmp(name,(current->getStudent())->getFName()) == 0 && strcasecmp(lName,(current->getStudent())->getLName())){
+				cout << "Student found at " << hashID;
+				printStudent(current->getStudent());
+			}
+		}else{
+			int count = 0;
+			while(current != NULL){
+				if(strcasecmp(name,(current->getStudent())->getFName()) == 0 && strcasecmp(lName,(current->getStudent())->getLName())){
+					cout << "Student found at " << hashID;
+					printStudent(current->getStudent());
+				}
+				
+				current = current->getNext();
+				count++;
+			}
+			if(count > 0){
+				cout << count << " extra students found in linked chain.\n";
+			}else{
+				cout << "Student not found!";
+			}
+			
+		}
+		
+	}else if(strcasecmp(input, "print") == 0 || strcasecmp(input, "p") == 0){
+		LinkedList** table = hashTable->getTable();
+		int count = 0;
+		for(int x = 0; x < hashTable->getTableSize(); x++){
+			LinkedList* current = table[x];
+			if(current != NULL){
+				printStudent(current->getStudent());
+				current = current->getNext();
+				count++;
+			}
+		}
+		
+		cout << "\n\n" << count << " Total Students." << endl;
+		
+	}else if(strcasecmp(input, "quit") == 0 || strcmp(input, "q") == 0){
 		exit(0);
 	}else{
 		cout << "\nUnrecognized command.\n";
@@ -91,7 +143,7 @@ int convertCharToInt(char c ){
 		return 9;
 	}else{
 		cout << "\nError: trying to input non-number" << endl;
-		exit(24);
+		//exit(24);
 	}
 }
 

@@ -8,7 +8,7 @@
 class Student
 {
 	public:
-		Student();
+		Student(int&);
 		Student(char*,char*,float);
 		~Student();
 		

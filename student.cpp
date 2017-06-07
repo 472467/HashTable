@@ -1,16 +1,23 @@
 #include "student.h"
 #include <cstdlib>
 
-Student::Student(){
-	srand(time(0));
-	
+Student::Student(int& sd){
+	srand(sd);
+	sd++;
 	genFName();
+	srand(sd);
+	sd++;
 	genLName();
+	srand(sd);
+	sd++;
 	gpa = (((float)(rand() % 400))/100); 
 	
 }
 
 Student::Student(char* f, char* l, float g){
+	fName = new char[10];
+	lName = new char[10];
+	
 	strcpy(fName, f);
 	strcpy(lName,l);
 	gpa = g;
